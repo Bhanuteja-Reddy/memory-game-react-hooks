@@ -1,24 +1,39 @@
-import logo from './logo.svg';
+import { useState } from "react";
+import { StoreProvider } from './store/Store';
+import { rootReducer, initialState } from './store/reducers';
+import { AxiosInstance } from './shared/services/axios-instance';
+import LoadingSpinner from './shared/components/loading-spinner';
+import MemoryGame from './pages/MemoryGame/MemoryGame';
 import './App.css';
 
 function App() {
+  const [loading, setLoading] = useState(false);
+
+  /**
+   * Axios interceptors for loading symbol enable and disable
+   */
+  AxiosInstance.interceptors.request.use(request => {
+    setLoading(true);
+    return request;
+  });
+
+  AxiosInstance.interceptors.response.use(response => {
+    setLoading(false);
+    return response;
+  }, error => {
+    setLoading(false);
+    throw error;
+  })
+
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <StoreProvider initialState={initialState} reducer={rootReducer}>
+      <>
+        <LoadingSpinner loading={loading} />
+        <MemoryGame />
+      </>
+    </StoreProvider>
   );
 }
 
